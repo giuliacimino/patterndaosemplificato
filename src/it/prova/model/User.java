@@ -1,7 +1,7 @@
 package it.prova.model;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class User {
 	private Long id;
@@ -84,7 +84,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		String dateCreatedString = dateCreated != null ? new SimpleDateFormat("dd/MM/yyyy").format(dateCreated)
+		String dateCreatedString = dateCreated != null ? DateTimeFormatter.ofPattern("dd/MM/yyyy").format(dateCreated)
 				: " N.D.";
 
 		return "User [id=" + id + ", nome=" + nome + ", cognome=" + cognome + ", login=" + login + ", password="

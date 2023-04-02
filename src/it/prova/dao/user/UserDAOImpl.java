@@ -10,6 +10,8 @@ import java.util.List;
 
 import it.prova.dao.AbstractMySQLDAO;
 import it.prova.model.User;
+import it.prova.connection.MyConnection;
+import it.prova.model.User;
 
 public class UserDAOImpl extends AbstractMySQLDAO implements UserDAO {
 
@@ -196,32 +198,206 @@ public class UserDAOImpl extends AbstractMySQLDAO implements UserDAO {
 
 	@Override
 	public List<User> findAllByCognome(String cognomeInput) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		// prima di tutto cerchiamo di capire se possiamo effettuare le operazioni
+				if (isNotActive())
+					throw new Exception("Connessione non attiva. Impossibile effettuare operazioni DAO.");
+				
+				
+				if(cognomeInput==null) {
+					throw new Exception("errore: non è stato inserito alcun cognome!");
+				}
+				List<User> elencoUtentiConCognome =new ArrayList<User>();
+				
+				try (PreparedStatement ps = connection.prepareStatement("select * from user u where u.cognome like ?");){
+
+					ps.setString(1, cognomeInput);
+					try(ResultSet rs = ps.executeQuery()){;
+
+						while (rs.next()) {
+							User temp = new User();
+							temp.setId(rs.getLong("id"));
+							temp.setNome(rs.getString("nome"));
+							temp.setCognome(rs.getString("cognome"));
+							temp.setLogin(rs.getString("login"));
+							temp.setPassword(rs.getString("password"));
+							temp.setDateCreated(
+									rs.getDate("datecreated") != null ? rs.getDate("datecreated").toLocalDate() : null);
+							elencoUtentiConCognome.add(temp);
+
+						}
+					}
+
+				} catch (Exception e) {
+
+					e.printStackTrace();
+
+				}
+				return elencoUtentiConCognome;
 	}
 
 	@Override
 	public List<User> findAllByLoginIniziaCon(String caratteriInizialiInput) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		if (isNotActive())
+			throw new Exception("Connessione non attiva. Impossibile effettuare operazioni DAO.");
+		
+		
+		if(caratteriInizialiInput==null) {
+			throw new Exception("errore: non è stato inserito alcun login!");
+		}
+		List<User> elencoUtentiConLogin =new ArrayList<User>();
+		
+		try (PreparedStatement ps = connection.prepareStatement("select * from user u where u.login like ?");){
+
+			ps.setString(1, caratteriInizialiInput + '%');
+			try(ResultSet rs = ps.executeQuery()){;
+
+				while (rs.next()) {
+					User temp = new User();
+					temp.setId(rs.getLong("id"));
+					temp.setNome(rs.getString("nome"));
+					temp.setCognome(rs.getString("cognome"));
+					temp.setLogin(rs.getString("login"));
+					temp.setPassword(rs.getString("password"));
+					temp.setDateCreated(
+							rs.getDate("datecreated") != null ? rs.getDate("datecreated").toLocalDate() : null);
+					elencoUtentiConLogin.add(temp);
+
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
+		return elencoUtentiConLogin;
 	}
 
 	@Override
 	public User findByLoginAndPassword(String loginInput, String passwordInput) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		// prima di tutto cerchiamo di capire se possiamo effettuare le operazioni
+		if (isNotActive())
+			throw new Exception("Connessione non attiva. Impossibile effettuare operazioni DAO.");
+		
+		
+		if(loginInput==null) {
+			throw new Exception("errore: non è stato inserito alcun login!");
+		}
+		if (passwordInput==null) {
+			throw new Exception ("errore: non è stata inserita alcuna password!");
+		}
+		List<User> elencoUtentiConLoginEPassword =new ArrayList<User>();
+		
+		try (PreparedStatement ps = connection.prepareStatement("select * from user u where u.login like ? and u.password like ?");){
+
+			ps.setString(1, loginInput);
+			ps.setString(2, passwordInput);
+			try(ResultSet rs = ps.executeQuery()){;
+
+				while (rs.next()) {
+					User temp = new User();
+					temp.setId(rs.getLong("id"));
+					temp.setNome(rs.getString("nome"));
+					temp.setCognome(rs.getString("cognome"));
+					temp.setLogin(rs.getString("login"));
+					temp.setPassword(rs.getString("password"));
+					temp.setDateCreated(
+							rs.getDate("datecreated") != null ? rs.getDate("datecreated").toLocalDate() : null);
+					elencoUtentiConLoginEPassword.add(temp);
+
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
 	}
 
 	@Override
 	public List<User> findAllByPasswordIsNull() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		
+		if (isNotActive())
+			throw new Exception("Connessione non attiva. Impossibile effettuare operazioni DAO.");
+		
+		List<User> elencoUtentiConPasswordNull =new ArrayList<User>();
+		
+		try (PreparedStatement ps = connection.prepareStatement("select * from user u where u.password is null");){
+			try(ResultSet rs = ps.executeQuery()){;
+
+				while (rs.next()) {
+					User temp = new User();
+					temp.setId(rs.getLong("id"));
+					temp.setNome(rs.getString("nome"));
+					temp.setCognome(rs.getString("cognome"));
+					temp.setLogin(rs.getString("login"));
+					temp.setPassword(rs.getString("password"));
+					temp.setDateCreated(
+							rs.getDate("datecreated") != null ? rs.getDate("datecreated").toLocalDate() : null);
+					elencoUtentiConPasswordNull.add(temp);
+
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
+		return elencoUtentiConPasswordNull;
 	}
 
 	@Override
 	public List<User> findByExample(User input) throws Exception {
-		// TODO Auto-generated method stub
-		return new ArrayList<>();
+		if (isNotActive())
+		throw new Exception("Connessione non attiva. Impossibile effettuare operazioni DAO.");
+
+	if (input == null)
+		throw new Exception("Valore di input non ammesso.");
+
+	ArrayList<User> result = new ArrayList<User>();
+	User userTemp = null;
+
+	String query = "select * from user where 1=1 ";
+	if (input.getCognome() != null && !input.getCognome().isEmpty()) {
+		query += " and cognome like '" + input.getCognome() + "%' ";
+	}
+	if (input.getNome() != null && !input.getNome().isEmpty()) {
+		query += " and nome like '" + input.getNome() + "%' ";
+	}
+
+	if (input.getLogin() != null && ! input.getLogin().isEmpty()) {
+		query += " and login like '" + input.getLogin() + "%' ";
+	}
+
+	if (input.getPassword() != null && !input.getPassword().isEmpty()) {
+		query += " and password like '" + input.getPassword() + "%' ";
+	}
+
+	if (input.getDateCreated() != null) {
+		query += " and DATECREATED='" + java.sql.Date.valueOf(example.getDateCreated()) + "' ";
+	}
+
+	try (Statement ps = connection.createStatement()) {
+		ResultSet rs = ps.executeQuery(query);
+
+		while (rs.next()) {
+			userTemp = new User();
+			userTemp.setNome(rs.getString("nome"));
+			userTemp.setCognome(rs.getString("cognome"));
+			userTemp.setLogin(rs.getString("login"));
+			userTemp.setPassword(rs.getString("password"));
+			userTemp.setDateCreated(
+					rs.getDate("datecreated") != null ? rs.getDate("datecreated").toLocalDate() : null);
+			userTemp.setId(rs.getLong("id"));
+			result.add(userTemp);
+		}
+	} catch (Exception e) {
+		e.printStackTrace();
+		throw e;
+	}
+	return result;
 	}
 
 	// ############################################################

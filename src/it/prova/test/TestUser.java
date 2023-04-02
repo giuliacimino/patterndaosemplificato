@@ -38,6 +38,11 @@ public class TestUser {
 			System.out.println("In tabella user ci sono " + userDAOInstance.list().size() + " elementi.");
 
 			// ESERCIZIO SUCCESSIVO: implementare metodi mancanti nel DAO
+			
+			testFindAllByCognome (userDAOInstance);
+			System.out.println("In tabella user ci sono " );
+			
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,6 +128,19 @@ public class TestUser {
 		}
 
 		System.out.println(".......testFindAllWhereDateCreatedGreaterThan fine: PASSED.............");
+	}
+	
+	
+	private static void testFindAllByCognome (UserDAO userDAOInstance) throws Exception {
+		System.out.println("......inizio testFindAllByCognome........");
+		String cognomeDaRicercare="rossi";
+		List<User> elencoUtentiConCognomeCercato= userDAOInstance.findAllByCognome(cognomeDaRicercare);
+		if (elencoUtentiConCognomeCercato.size()<1) {
+			throw new RuntimeException("test FAILED: non è presente alcun utente con il cognome "+ cognomeDaRicercare);
+		}
+		System.out.println("fine del test: PASSED");
+		
+		
 	}
 
 }
